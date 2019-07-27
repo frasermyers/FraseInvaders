@@ -7,6 +7,7 @@ tk.resizable(0, 0)
 tk.wm_attributes("-topmost", 1)
 canvas = Canvas(tk, width=720, height=560, bd=0, highlightthickness=0)
 canvas.config(bg="black")
+canvas.create_line(0, 30, 720, 30, fill="pink")
 canvas.pack()
 tk.update()
 
@@ -15,7 +16,7 @@ class Sprite:
 
     def __init__(self, canvas, color="white", x=10, y=10, w=15, h=15, x_vel=0, y_vel=0):
         self.canvas = canvas
-        self.id = canvas.create_rectangle(x, y, x+w, y+h, fill=color)
+        self.id = canvas.create_oval(x, y, x+w, y+h, fill=color)
         self.x_vel = x_vel
         self.y_vel = y_vel
         self.canvas_height = self.canvas.winfo_height()
@@ -39,7 +40,8 @@ class Sprite:
         pos = self.canvas.coords(self.id)
         self.canvas_height = self.canvas.winfo_height()
         self.canvas_width = self.canvas.winfo_width()
-        if pos[3] <= 0:
+        if pos[3] <= 35:
+            canvas.delete(self.id)
             return True
         return False
 
@@ -74,7 +76,7 @@ class Enemy(Sprite):
 
 class Hero(Sprite):
 
-    def __init__(self, canvas, color="Blue", x=360, y=500, w=40, h=40, x_vel=0, y_vel=0):
+    def __init__(self, canvas, color="SeaGreen1", x=360, y=500, w=40, h=40, x_vel=0, y_vel=0):
 
         super(Hero, self).__init__(canvas, color=color, x=x, y=y, w=w, h=h, x_vel=x_vel, y_vel=y_vel)
         self.canvas.bind_all('<KeyPress-Left>', self.left_key_pressed)
@@ -97,19 +99,19 @@ class Hero(Sprite):
 
 class Bullet(Sprite):
 
-    def __init__(self, canvas, color="White", x=360, y=400, w=6, h=10, x_vel=0, y_vel=-5, firing_object=None):
+    def __init__(self, canvas, color="Pink", x=360, y=400, w=6, h=10, x_vel=0, y_vel=-5, firing_object=None):
         positions = firing_object.canvas.coords(firing_object.id)
         super(Bullet, self).__init__(canvas, color=color, x=positions[0], y=positions[1], w=w, h=h, x_vel=x_vel, y_vel=y_vel)
 
 
 refresh_rate = 0.01
-num_enemies = 16
+num_enemies = 10
 x_spacing = 40
 y_spacing = 40
 enemies = []
 heroes = []
 start_x = 10
-start_y = 10
+start_y = 40
 x = start_x
 y = start_y
 x_vel = 1.5
@@ -161,6 +163,10 @@ def up_key_press(evt):
         bullet = Bullet(canvas, firing_object=hero)
 
 
+score_text_1 = score_text = canvas.create_text(630, 15, text="Score: ", font=("Arial", 16), fill="white")
+score_text = canvas.create_text(680, 15, text=score, font=("Arial", 16), fill="white")
+
+
 def hit_check(bullet):
     for enemy in enemies:
         if bullet is not None:
@@ -168,15 +174,29 @@ def hit_check(bullet):
                 enemies.remove(enemy)
                 canvas.delete(enemy.id)
                 global score
+                global score_text
                 score += 1
+                canvas.delete(score_text)
+                score_text = canvas.create_text(680, 15, text=score, font=("Arial", 16), fill="white")
                 return True
+
+
+win_text = None
+
+
+def win():
+    if score == num_enemies:
+        global win_text
+        win_text = canvas.create_text(360, 280, text="You Win!", font=("Arial", 40), fill="white")
 
 
 canvas.bind_all('<KeyPress-Up>', up_key_press)
 
 bullet = None
 
+
 while 1:
+    win()
     hit_check(bullet)
     draw_all_enemies()
     draw_all_heroes()

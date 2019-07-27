@@ -1,5 +1,4 @@
 from tkinter import *
-import random
 import time
 
 tk = Tk()
@@ -21,6 +20,7 @@ class Sprite:
         self.y_vel = y_vel
         self.canvas_height = self.canvas.winfo_height()
         self.canvas_width = self.canvas.winfo_width()
+        self.pos = self.canvas.coords(self.id)
 
     def draw(self):
         self.canvas.move(self.id, self.x_vel, self.y_vel)
@@ -35,6 +35,36 @@ class Sprite:
             return True
         return False
 
+    def hit_roof(self):
+        pos = self.canvas.coords(self.id)
+        self.canvas_height = self.canvas.winfo_height()
+        self.canvas_width = self.canvas.winfo_width()
+        if pos[3] <= 0:
+            return True
+        return False
+
+    def hit_other_object(self, other_object):
+        current_object_pos = self.canvas.coords(self.id)
+        other_object_pos = self.canvas.coords(other_object.id)
+
+        if other_object_pos[0] <= current_object_pos[2] <= other_object_pos[2]:
+            if other_object_pos[3] >= current_object_pos[3] >= other_object_pos[1]:
+                return True
+
+        if other_object_pos[0] <= current_object_pos[0] <= other_object_pos[2]:
+            if other_object_pos[3] >= current_object_pos[3] >= other_object_pos[1]:
+                return True
+
+        if other_object_pos[0] <= current_object_pos[2] <= other_object_pos[2]:
+            if other_object_pos[3] >= current_object_pos[1] >= other_object_pos[1]:
+                return True
+
+        if other_object_pos[0] <= current_object_pos[0] <= other_object_pos[2]:
+            if other_object_pos[3] >= current_object_pos[1] >= other_object_pos[1]:
+                return True
+
+        return False
+
 
 class Enemy(Sprite):
 
@@ -45,6 +75,7 @@ class Enemy(Sprite):
 class Hero(Sprite):
 
     def __init__(self, canvas, color="Blue", x=360, y=500, w=40, h=40, x_vel=0, y_vel=0):
+
         super(Hero, self).__init__(canvas, color=color, x=x, y=y, w=w, h=h, x_vel=x_vel, y_vel=y_vel)
         self.canvas.bind_all('<KeyPress-Left>', self.left_key_pressed)
         self.canvas.bind_all('<KeyRelease-Left>', self.left_key_released)
@@ -62,6 +93,13 @@ class Hero(Sprite):
 
     def right_key_released(self, evt):
         self.x_vel = 0
+
+
+class Bullet(Sprite):
+
+    def __init__(self, canvas, color="White", x=360, y=400, w=6, h=10, x_vel=0, y_vel=-5, firing_object=None):
+        positions = firing_object.canvas.coords(firing_object.id)
+        super(Bullet, self).__init__(canvas, color=color, x=positions[0], y=positions[1], w=w, h=h, x_vel=x_vel, y_vel=y_vel)
 
 
 refresh_rate = 0.01
@@ -86,8 +124,11 @@ for i in range(num_enemies):
         x = start_x
         y += y_spacing
 
+
 hero = Hero(canvas)
 heroes.append(hero)
+
+score = 0
 
 
 def draw_all_enemies():
@@ -114,15 +155,38 @@ def draw_all_heroes():
         hero.draw()
 
 
+def up_key_press(evt):
+    global bullet
+    if bullet is None:
+        bullet = Bullet(canvas, firing_object=hero)
 
+
+def hit_check(bullet):
+    for enemy in enemies:
+        if bullet is not None:
+            if bullet.hit_other_object(enemy):
+                enemies.remove(enemy)
+                canvas.delete(enemy.id)
+                global score
+                score += 1
+                return True
+
+
+canvas.bind_all('<KeyPress-Up>', up_key_press)
+
+bullet = None
 
 while 1:
+    hit_check(bullet)
     draw_all_enemies()
     draw_all_heroes()
+    if bullet is not None:
+        bullet.draw()
+        if bullet.hit_roof():
+            bullet = None
     enemy_hit_wall = wall_hit_check()
     if enemy_hit_wall:
         shift_enemies()
-
 
     tk.update_idletasks()
     tk.update()

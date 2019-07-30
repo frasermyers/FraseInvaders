@@ -20,8 +20,8 @@ main_button_text = "Start Game"
 running = False
 
 
-params = {"refresh_rate": 0.01, "num_enemies": 1, "x_spacing": 40, "y_spacing": 40,
-          "start_x": 273, "start_y": 20, "x_vel": 1.5, "y_vel": 0, "win_text": None, "version": 1.0}
+params = {"refresh_rate": 0.01, "num_enemies": 10, "x_spacing": 40, "y_spacing": 40,
+          "start_x": 273, "start_y": 20, "x_vel": 1.5, "y_vel": 0, "win_text": None, "version": 1.1}
 
 
 def set_variables():

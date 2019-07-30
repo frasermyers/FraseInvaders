@@ -21,7 +21,7 @@ running = False
 
 
 params = {"refresh_rate": 0.01, "num_enemies": 1, "x_spacing": 40, "y_spacing": 40,
-          "start_x": 273, "start_y": 20, "x_vel": 1.5, "y_vel": 0, "win_text": None}
+          "start_x": 273, "start_y": 20, "x_vel": 1.5, "y_vel": 0, "win_text": None, "version": 1.0}
 
 
 def set_variables():
@@ -119,7 +119,7 @@ high_score_label.grid(row=0, column=2, sticky='ew')
 play_button = Button(tk, text=main_button_text, bg="pink", font=('System', 18))
 play_button.bind("<Button-1>", start_game)
 play_button.grid(row=1, column=0, sticky='nesw')
-restart_button = Button(tk, text="Button does nothing", bg="pale green", font=('System', 18))
+restart_button = Button(tk, text="Version {}".format(params['version']), bg="pale green", font=('System', 18))
 restart_button.bind("<Button-1>")
 restart_button.grid(row=2, column=0, sticky='nesw')
 pause_button = Button(tk, text="Pause Game", bg="lightblue", font=('System', 18))
